@@ -133,19 +133,7 @@ class FloatingDocManager {
             try {
                 this.protyle = new Protyle(this.plugin.app, this.protyleContainer, {
                     blockId: note.id,
-                    mode: 'preview', // 预览模式，可以查看和编辑
-                    toolbar: [
-                        "emoji",
-                        "headings",
-                        "bold",
-                        "italic",
-                        "strike",
-                        "link",
-                        "code",
-                        "upload",
-                        "undo",
-                        "redo"
-                    ], // 简化工具栏
+                    mode: 'preview', // 预览模式
                 });
             } catch (error) {
                 console.error('Protyle初始化失败:', error);
