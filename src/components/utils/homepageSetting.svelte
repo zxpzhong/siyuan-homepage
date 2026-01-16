@@ -2,8 +2,6 @@
     import { onMount } from "svelte";
     import "emoji-picker-element";
     import "./homepageSettingStyle/homepageSetting.scss";
-    import * as advanced from "./advanced";
-    import { showMessage } from "siyuan";
 
     export let plugin: any;
     export let close: () => void;
@@ -110,13 +108,6 @@
     let FallingDensity = "medium";
     let FallingSpeed = "medium";
 
-    // VIP设置
-    let USER_NAME: string;
-    let USER_ID: string;
-    let USER_CODE: string;
-    let ActivationCode: string;
-    let activated: boolean;
-    let activationResult: any;
     let advancedEnabled = false;
 
     // 设置页面加载时读取配置信息
@@ -445,27 +436,6 @@
         <button
             on:click={() => (activeTab = "homepage")}
             class:active={activeTab === "homepage"}>主页设置</button
-        >
-        <button
-            on:click={async () => {
-                activeTab = "vip";
-                await advanced.updateVIP().then((res) => {
-                    USER_NAME = res.USER_NAME;
-                    USER_ID = res.USER_ID;
-                    USER_CODE = res.ENCRYPTED_USER_CODE;
-                });
-                activationResult = await advanced.verifyLicense(
-                    plugin,
-                    USER_NAME,
-                    USER_ID,
-                );
-                activated = activationResult.valid;
-                if (!activated && activationResult.code != 2) {
-                    showMessage(activationResult.error);
-                    advanced.deleteLicense(plugin);
-                }
-            }}
-            class:active={activeTab === "vip"}>会员服务</button
         >
         <button
             on:click={() => (activeTab = "about")}
@@ -1184,205 +1154,6 @@
                     >✅ 确认</button
                 >
                 <button class="btn" on:click={cancelSave}>❌ 取消</button>
-            </div>
-        {:else if activeTab === "vip"}
-            <div class="vip-section">
-                <div class="vip-info">
-                    {#if USER_NAME || USER_ID}
-                        <label for="">用户名：{USER_NAME}</label>
-                        <label for="">用户ID：{USER_ID}</label>
-                    {:else}
-                        <label for="">请先登录后进行查看！</label>
-                    {/if}
-                </div>
-                {#if activated}
-                    <div class="activated">
-                        <h2>👑当前用户已激活👑</h2>
-                        <label for=""
-                            >到期时间：{activationResult.userInfo.due}</label
-                        >
-                        <label for=""
-                            >剩余天数：{activationResult.userInfo
-                                .remainingDays}</label
-                        >
-                        <button
-                            on:click={async () => {
-                                const saveVIPConfDataResult =
-                                    await advanced.saveVIPConfData(plugin, "");
-                                if (saveVIPConfDataResult) {
-                                    activated = false;
-                                    advanced.deleteLicense(plugin);
-                                }
-                            }}>注销激活</button
-                        >
-                    </div>
-                {:else}
-                    <div class="vip-activate">
-                        <h2>👑 VIP 激活</h2>
-                        <h3>
-                            <a
-                                href="https://ttl8ygt82u.feishu.cn/wiki/GEHMwHxE0icZZ8kq124cCAP6njh?from=from_copylink"
-                                target="_blank">👑查看会员权益👑</a
-                            >
-                        </h3>
-                        {#if USER_NAME || USER_ID}
-                            <label for=""
-                                >购买时，请将下列标识码附在留言区域：</label
-                            >
-                            <div class="code-box">
-                                <input
-                                    type="text"
-                                    class="user-code"
-                                    value={USER_CODE}
-                                    readonly
-                                />
-                                <button
-                                    on:click={() => {
-                                        navigator.clipboard
-                                            .writeText(USER_CODE)
-                                            .then(() => {
-                                                showMessage(
-                                                    "✅ 用户标识码已复制到剪贴板",
-                                                );
-                                            })
-                                            .catch((err) => {
-                                                console.error("复制失败", err);
-                                            });
-                                    }}
-                                    class="btn copy-button"
-                                    title="复制用户标识码"
-                                    aria-label="复制用户标识码">复制</button
-                                >
-                            </div>
-                            <div class="purchase-plan">
-                                <h4>💰 订阅方案</h4>
-                                <div class="plan-card">
-                                    <div class="plan-item monthly">
-                                        <div class="plan-price">8 元</div>
-                                        <div class="plan-duration">/ 月</div>
-                                    </div>
-                                    <div class="plan-item monthly">
-                                        <div class="plan-price">20 元</div>
-                                        <div class="plan-duration">/ 季</div>
-                                    </div>
-                                    <div class="plan-item yearly">
-                                        <div class="plan-price">69 元</div>
-                                        <div class="plan-duration">/ 年</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="purchase-address">
-                                <h4>🛍️ 购买地址</h4>
-                                <div class="address-card">
-                                    <div class="address-item">
-                                        <span class="icon">🔗</span>
-                                        <div class="address-content">
-                                            <strong>地址：</strong>
-                                            <a
-                                                href="https://afdian.com/a/glaube-ty"
-                                                >爱发电</a
-                                            >
-                                        </div>
-                                    </div>
-                                    <div class="qrcode-container">
-                                        <img
-                                            class="qrcode"
-                                            src="https://glaube-ty.oss-cn-chengdu.aliyuncs.com/img/afdian-Glaube_TY.jpg"
-                                            alt="爱发电二维码"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="reminder">
-                                <div class="reminder-card">
-                                    <div class="reminder-item">
-                                        <span class="icon">💬</span>
-                                        <p>
-                                            工作日 09:00 - 22:00
-                                            回复会比较快，其他时候看到会第一时间处理。
-                                        </p>
-                                    </div>
-                                    <div class="reminder-item">
-                                        <span class="icon">💡</span>
-                                        <p>虚拟产品购买后不支持退款！</p>
-                                    </div>
-                                    <div class="reminder-item">
-                                        <span class="icon">🎁</span>
-                                        <p>
-                                            若在插件 2.0
-                                            版本前打赏过，可将打赏订单号及标识码发送至下方邮箱或联系频道管理员，赠送一年
-                                            VIP。
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="purchase-question">
-                                <h4>❓ 问题咨询</h4>
-                                <div class="question-card">
-                                    <div class="question-item">
-                                        <span class="icon">📧</span>
-                                        <div class="question-content">
-                                            <strong>邮箱：</strong>
-                                            <a href="mailto:glaube_ty@qq.com"
-                                                >glaube_ty@qq.com</a
-                                            >
-                                        </div>
-                                    </div>
-                                    <div class="question-item">
-                                        <span class="icon">💬</span>
-                                        <div class="question-content">
-                                            <strong
-                                                >腾讯频道：(订阅问题请私信管理员)</strong
-                                            >
-                                            <a
-                                                href="https://pd.qq.com/s/2ks4079x0"
-                                                >思源笔记主页插件</a
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <label for=""
-                                >激活码：<textarea bind:value={ActivationCode}
-                                ></textarea></label
-                            >
-                            <div class="btn-group">
-                                <button
-                                    on:click={async () => {
-                                        const saveVIPConfDataResult =
-                                            await advanced.saveVIPConfData(
-                                                plugin,
-                                                ActivationCode,
-                                            );
-                                        if (saveVIPConfDataResult) {
-                                            activationResult =
-                                                await advanced.verifyLicense(
-                                                    plugin,
-                                                    USER_NAME,
-                                                    USER_ID,
-                                                );
-                                            if (activationResult.code !== 0) {
-                                                showMessage(
-                                                    activationResult.error,
-                                                );
-                                                advanced.deleteLicense(plugin);
-                                            } else {
-                                                showMessage("✅激活成功！");
-                                                activated = true;
-                                            }
-                                        }
-                                    }}>激活</button
-                                >
-                            </div>
-                        {:else}
-                            <label for=""
-                                >由于会员功能与账号绑定，<br
-                                />请先登录后进行查看！</label
-                            >
-                        {/if}
-                    </div>
-                {/if}
             </div>
         {:else if activeTab === "about"}
             <div class="about-section">
