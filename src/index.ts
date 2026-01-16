@@ -7,7 +7,6 @@ import {
 } from "siyuan";
 
 import { svelteDialog } from "@/libs/dialog";
-import * as advanced from "@/components/utils/advanced";
 
 import * as sdk from "@siyuan-community/siyuan-sdk";
 import Homepage from "./components/homepage.svelte";
@@ -25,7 +24,7 @@ export default class PluginHomepage extends Plugin {
     customTab: () => IModel;
     isMobile: boolean;
     currentMobileDialog: any = null;
-    ADVANCED = false;
+    ADVANCED = true;
     private docTreeMenuEventBindThis = this.handleDocTreeMenu.bind(this);
     private contentMenuEventBindThis = this.handleContentMenu.bind(this);
 
@@ -115,29 +114,6 @@ export default class PluginHomepage extends Plugin {
             }
         }
 
-        let USER_NAME, USER_ID
-        await advanced.updateVIP().then((res) => {
-            USER_NAME = res.USER_NAME;
-            USER_ID = res.USER_ID;
-        });
-        await advanced.verifyLicense(
-            this,
-            USER_NAME,
-            USER_ID,
-        ).then(async (res) => {
-            if (res.valid && res.code === 0) {
-                this.ADVANCED = true;
-                if (res.userInfo.remainingDays === 7) {
-                    showMessage("您的激活码还有 7 天过期，建议及时更新！");
-                } else if (res.userInfo.remainingDays === 3) {
-                    showMessage("您的激活码还有 3 天过期，建议及时更新！");
-                } else if (res.userInfo.remainingDays === 1) {
-                    showMessage("您的激活码还有 1 天过期，建议及时更新！");
-                }
-            } else if (res.code === 5) {
-                showMessage("❌ 您的激活码已过期！");
-            }
-        });
     }
 
     private registerIcon() {
